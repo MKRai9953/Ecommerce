@@ -5,9 +5,12 @@ const ApiFeatures = require("../utils/ApiFeatures");
 
 // Get all products
 exports.getAllProducts = catchAsync(async (req, res) => {
+  const resultPage = 5;
   const apiFeature = new ApiFeatures(Product.find(), req.query)
     .search()
-    .filter();
+    .filter()
+    .pagination(resultPage);
+    
   const products = await apiFeature.query;
 
   res.status(200).json({ success: true, products: products });

@@ -24,10 +24,22 @@ class ApiFeatures {
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (key) => `$${key}`);
 
     this.query = this.query.find(JSON.parse(queryStr));
+
     return this;
   }
 
-  pagination() {}
+  pagination(resultPerPage = 5) {
+    if (this.queryStr.limit) {
+      resultPerPage = this.queryStr.limit;
+    }
+
+    let currentPage = Number(this.queryStr.page) || 1;
+
+    const skip = resultPerPage * (currentPage - 1);
+
+    this.query = this.query.skip(skip).limit(resultPerPage);
+    return this;
+  }
 }
 
 module.exports = ApiFeatures;
