@@ -4,7 +4,7 @@ const app = express();
 const path = require("path");
 const connectDB = require("./database/Database");
 const error = require("./middleware/error");
-
+const qs = require("qs");
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 //
@@ -16,11 +16,12 @@ process.on("uncaughtException", (err) => {
 // DB connect
 connectDB();
 
-// Route Imports
-const productRoutes = require("./routes/ProductRoutes");
-
 // Middleware
 app.use(express.json());
+app.set("query parser", (str) => qs.parse(str));
+
+// Route Imports
+const productRoutes = require("./routes/ProductRoutes");
 
 // Routes
 app.use("/api/v1", productRoutes);
