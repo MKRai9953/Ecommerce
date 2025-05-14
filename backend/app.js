@@ -22,9 +22,11 @@ app.set("query parser", (str) => qs.parse(str));
 
 // Route Imports
 const productRoutes = require("./routes/ProductRoutes");
+const userRoutes = require("./routes/UserRoutes");
 
 // Routes
 app.use("/api/v1", productRoutes);
+app.use("/api/v1", userRoutes);
 
 //Error for middleware
 app.use(error);
