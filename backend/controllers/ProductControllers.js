@@ -21,6 +21,7 @@ exports.getAllProducts = catchAsync(async (req, res) => {
 
 // Create a new product
 exports.createProduct = catchAsync(async (req, res, next) => {
+  req.body.user = req.user.id;
   const product = await Product.create(req.body);
   res.status(201).json({ success: true, product: product });
 });
