@@ -53,7 +53,7 @@ userSchema.pre("save", async function (next) {
 userSchema.method("getJWTToken", function () {
   return jwt.sign({ id: this._id }, process.env.JWTSecret, {
     expiresIn: process.env.JWT_Expire,
-  });
+});
 });
 
 userSchema.method("comparePassword", async function (password) {
