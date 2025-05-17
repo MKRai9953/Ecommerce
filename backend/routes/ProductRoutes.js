@@ -17,4 +17,5 @@ router
   .route("/products")
   .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteProducts);
 router.route("/product/:id").get(getProductDetails).patch(updateproduct);
+
 module.exports = router;

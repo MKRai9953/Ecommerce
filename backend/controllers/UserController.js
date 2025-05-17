@@ -3,6 +3,7 @@ const User = require("../models/user_models.js/UserModel");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendToken = require("../utils/jwtToken");
 const sendEmail = require("../utils/sendEmail");
+const crypto = require("crypto");
 // Register our users
 exports.registerUser = catchAsyncError(async (req, res) => {
   const { name, email, password } = req.body;
@@ -76,10 +77,98 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
       .status(200)
       .json({ success: true, message: `email has been send to ${user.email}` });
   } catch (err) {
-    console.error(err);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save({ validateBeforeSave: false });
     return next(new ErrorHandler(error.message, 500));
   }
+});
+
+// Reset Password
+exports.resetPassword = catchAsyncError(async (req, res, next) => {
+  // Creating token hash
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken: resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user)
+    return next(
+      new ErrorHandler("Reset Password token is is invalid or expired", 400)
+    );
+
+  if (req.body.newPassword !== req.body.confirmPasword) {
+    return next(new ErrorHandler("Password do not match", 400));
+  }
+
+  user.password = req.body.newPassword;
+  user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
+
+  await user.save({ validateBeforeSave: true });
+
+  sendToken(user, 200, res);
+});
+
+// Get USer's details
+exports.getUserDetails = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  res.status(200).json({ success: true, user });
+});
+
+// Update User's Password
+exports.updateUserPassword = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select("+password");
+
+  const isMatch = await user.comparePassword(req.body.oldPassword);
+
+  if (!isMatch) {
+    return next(new ErrorHandler("Old password is incorrect", 400));
+  }
+
+  if (req.body.newPassword !== req.body.confirmPasword) {
+    return next(new ErrorHandler(" Password does not match", 400));
+  }
+  user.password = req.body.newPassword;
+  await user.save({ validateBeforeSave: true });
+
+  sendToken(user, 200, res);
+});
+
+// Update User's Profile
+exports.updateUserProfile = catchAsyncError(async (req, res, next) => {
+  const newData = {
+    name: req.body.name,
+    email: req.body.email,
+  };
+
+  const user = User.findByIdAndUpdate(req.user.id, newData, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({ message: true });
+});
+
+// Get total Users COunt
+
+exports.getUserCount = catchAsyncError(async (req, res, next) => {
+  const count = await User.find().countDocuments();
+
+  res.status(200).json({ success: true, count });
+});
+
+// Get single User's detail
+
+exports.getSingleUserDetail = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.params.userId);
+
+  if (user) return next(new ErrorHandler("no such user has been found", 404));
+
+  res.status(200).json({ success: true, user });
 });
