@@ -179,7 +179,7 @@ exports.deleteAUser = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.params.userId);
   if (!user) return next("User not found", 404);
 
-  await User.findByIdAndDelete(req, params.userId);
+  await User.findByIdAndDelete(req.params.userId);
   res.status(200).json({ success: true });
 });
 
