@@ -5,8 +5,12 @@ const {
   myOrders,
   getAllOrders,
   deleteAllOrder,
+  updateOrderStatus,
+  deleteOrder,
 } = require("../controllers/OrderController");
 const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
+const catchAsyncError = require("../middleware/catchAsyncError");
+const OrderModels = require("../models/OrderModels/OrderModels");
 
 const router = express.Router();
 
@@ -31,3 +35,15 @@ router
   .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteAllOrder);
 
 module.exports = router;
+
+// Get all orders
+router
+  .route("/admin/orders")
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getAllOrders);
+
+//update Order
+
+router
+  .route("/admin/order/:id")
+  .put(isAuthenticatedUser, authorizeRoles("admin"), updateOrderStatus)
+  .delete(deleteOrder);

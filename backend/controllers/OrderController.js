@@ -72,7 +72,32 @@ exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Your order has already been Delivered", 400));
 
   order.orderItems.forEach(
-    async (order) => await updaetStock(order.product, order.quantity)
+    async (order) => await updateStock(order.product, order.quantity)
   );
-  const { status } = req.body;
+
+  order.orderStatus = req.body.status;
+
+  if (req.body.status === "Delivered") order.deliveredAt = Date.now();
+  await order.save({ validateBeforeSave: false });
+  res.status(200).json({ success: true });
+});
+
+async function updateStock(id, quantity) {
+  const product = await Order.findById(id);
+
+  product.stock -= quantity;
+}
+
+// Admin Route Delete Order
+
+exports.deleteOrder = catchAsyncError(async (req, res, next) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) return next(new ErrorHandler("there is no such order", 404));
+
+  await Order.findByIdAndDelete(req.params.id);
+
+  res
+    .status(200)
+    .json({ success: true, message: "The order has been delete Successfully" });
 });
