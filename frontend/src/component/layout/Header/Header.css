@@ -1,0 +1,12 @@
+.header {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background: #000;
+  display: flex;
+  & > .divs {
+    flex-grow: 1;
+    flex-shrink: 1;
+    background: red;
+  }
+}

@@ -21,7 +21,15 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        use: [
+          "style-loader",
+          {
+            loader: "css-loader",
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
       },
     ],
   },
@@ -35,7 +43,8 @@ module.exports = {
       directory: path.join(__dirname, "dist"),
     },
     compress: true,
-    port: 3000,
+    port: 3001,
     hot: true,
+    open: true,
   },
 };
